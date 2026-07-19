@@ -5,7 +5,6 @@ from datetime import date
 from typing import Optional
 
 import gspread
-from google.oauth2.credentials import Credentials
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
@@ -49,14 +48,25 @@ def _parse_date(value: str) -> Optional[date]:
 
 def _open_sheet() -> gspread.Spreadsheet:
     sheet_id = os.environ["SHEET_ID"]
-    raw = os.environ.get("GOOGLE_AUTHORIZED_USER_JSON")
-    if raw:
-        info = json.loads(raw)
+
+    raw_client = os.environ.get("GOOGLE_OAUTH_CLIENT_JSON")
+    if raw_client:
+        client_dict = json.loads(raw_client)
+    else:
+        with open("credentials.json", encoding="utf-8") as f:
+            client_dict = json.load(f)
+
+    raw_user = os.environ.get("GOOGLE_AUTHORIZED_USER_JSON")
+    if raw_user:
+        authorized_user_dict = json.loads(raw_user)
     else:
         with open("authorized_user.json", encoding="utf-8") as f:
-            info = json.load(f)
-    creds = Credentials.from_authorized_user_info(info, scopes=SCOPES)
-    client = gspread.authorize(creds)
+            authorized_user_dict = json.load(f)
+
+    client = gspread.oauth_from_dict(
+        client_config=client_dict,
+        authorized_user_info=authorized_user_dict,
+    )
     return client.open_by_key(sheet_id)
 
 
