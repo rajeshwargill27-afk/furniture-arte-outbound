@@ -1,0 +1,37 @@
+name: Outbound Email Sequencer
+
+on:
+  schedule:
+    # 13:00 UTC = 9:00 AM EDT (UTC-4) / 8:00 AM EST (UTC-5)
+    # Acceptable for v1 — no DST-aware scheduling in GHA cron
+    - cron: "0 13 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  run:
+    name: Send due emails
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      BREVO_SMTP_HOST: ${{ secrets.BREVO_SMTP_HOST }}
+      BREVO_SMTP_PORT: ${{ secrets.BREVO_SMTP_PORT }}
+      BREVO_SMTP_LOGIN: ${{ secrets.BREVO_SMTP_LOGIN }}
+      BREVO_SMTP_KEY: ${{ secrets.BREVO_SMTP_KEY }}
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+      SHEET_ID: ${{ secrets.SHEET_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run outbound agent
+        run: python run.py
