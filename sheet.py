@@ -63,10 +63,7 @@ def _open_sheet() -> gspread.Spreadsheet:
         with open("authorized_user.json", encoding="utf-8") as f:
             authorized_user_dict = json.load(f)
 
-    client = gspread.oauth_from_dict(
-        client_config=client_dict,
-        authorized_user_info=authorized_user_dict,
-    )
+    client, _ = gspread.oauth_from_dict(client_dict, authorized_user_dict)
     return client.open_by_key(sheet_id)
 
 
