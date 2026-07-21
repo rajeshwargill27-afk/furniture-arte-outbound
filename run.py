@@ -19,6 +19,15 @@ GAP: dict[int, int] = {2: 2, 3: 2, 4: 3, 5: 4}
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
 
+def skip_weekend(d: date) -> date:
+    """Roll a Saturday or Sunday forward to the following Monday."""
+    if d.weekday() == 5:   # Saturday
+        return d + timedelta(days=2)
+    if d.weekday() == 6:   # Sunday
+        return d + timedelta(days=1)
+    return d
+
+
 WARMUP_RAMP: list[tuple[int, int]] = [
     (2, 5),
     (6, 8),
@@ -144,7 +153,7 @@ def main() -> None:
                 contact.status = "done"
                 contact.next_due = None
             else:
-                contact.next_due = today + timedelta(days=GAP[n + 1])
+                contact.next_due = skip_weekend(today + timedelta(days=GAP[n + 1]))
             sent_count += 1
             print(f"[outbound] sent email #{n} to {contact.email} ({contact.company})"
                   + (f" — next due {contact.next_due}" if contact.next_due else " — sequence done"))

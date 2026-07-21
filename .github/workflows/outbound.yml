@@ -4,7 +4,7 @@ on:
   schedule:
     # 13:00 UTC = 9:00 AM EDT (UTC-4) / 8:00 AM EST (UTC-5)
     # Acceptable for v1 — no DST-aware scheduling in GHA cron
-    - cron: "0 13 * * *"
+    - cron: "0 13 * * 1-5"
   workflow_dispatch: {}
 
 jobs:
